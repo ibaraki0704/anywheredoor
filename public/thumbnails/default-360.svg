@@ -1,0 +1,11 @@
+<svg width="640" height="360" viewBox="0 0 640 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="640" height="360" fill="url(#paint0_linear)"/>
+<circle cx="320" cy="180" r="80" fill="white" fill-opacity="0.1"/>
+<text x="320" y="190" text-anchor="middle" fill="white" font-size="24" font-family="Arial, sans-serif">360° Video</text>
+<defs>
+<linearGradient id="paint0_linear" x1="0" y1="0" x2="640" y2="360" gradientUnits="userSpaceOnUse">
+<stop stop-color="#667EEA"/>
+<stop offset="1" stop-color="#764BA2"/>
+</linearGradient>
+</defs>
+</svg>
