@@ -95,3 +95,14 @@ Videos and thumbnails are served via Hono's serveStatic middleware:
 
 ### Type Safety
 Shared TypeScript interfaces between frontend (`src/lib/api.ts`) and backend (`api/index.ts`) ensure type consistency for Video, Category, and other domain objects across the application boundary.
+
+## 開発日誌を作成すること
+
+`dev_diary/yyyy-mm-dd_hhmm.md`の形式で開発日誌を作成してください。内容は以下のとおりです
+
+- 日付：yyyy-mm-dd
+- 作業内容：何をしたか、どんな問題があったか、どう解決したか
+- 次回の予定：
+- 感想：開発の進捗や学び
+- 気分：いい感じのことを書く
+- 愚痴：いい感じのことを書く
