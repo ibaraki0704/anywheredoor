@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { getVideos, getFeaturedVideos, getCategories, Video, Category } from '@/lib/api'
 import VideoCard from '@/components/VideoCard'
+import AuthButton from '@/components/AuthButton'
 import Link from 'next/link'
 
 export default function Home() {
@@ -118,17 +119,20 @@ export default function Home() {
               </h1>
             </Link>
 
-            <nav className="hidden md:flex items-center space-x-6">
-              <Link href="/" className="text-blue-600 dark:text-blue-400 font-medium">
-                Home
-              </Link>
-              <Link href="/upload" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                Upload
-              </Link>
-              <Link href="/profile" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                My Profile
-              </Link>
-            </nav>
+            <div className="flex items-center space-x-6">
+              <nav className="hidden md:flex items-center space-x-6">
+                <Link href="/" className="text-blue-600 dark:text-blue-400 font-medium">
+                  Home
+                </Link>
+                <Link href="/upload" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                  Upload
+                </Link>
+                <Link href="/profile" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                  My Profile
+                </Link>
+              </nav>
+              <AuthButton />
+            </div>
           </div>
         </div>
       </header>

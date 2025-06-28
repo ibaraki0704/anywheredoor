@@ -159,7 +159,17 @@ export const uploadVideoLocal = async (file: File, videoData: {
     if (videoData.country) formData.append('country', videoData.country)
     if (videoData.city) formData.append('city', videoData.city)
 
-    const result = await apiClient.uploadVideoLocal(formData)
+    // Use session-aware upload endpoint
+    const response = await fetch('/api/upload-session', {
+      method: 'POST',
+      body: formData,
+    })
+
+    if (!response.ok) {
+      throw new Error(`Upload failed: ${response.status}`)
+    }
+
+    const result = await response.json()
     return result
   } catch (error) {
     console.error('Upload failed:', error)

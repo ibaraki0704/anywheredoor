@@ -300,6 +300,7 @@ app.post('/api/upload', async (c) => {
     const locationName = formData.get('locationName') as string
     const country = formData.get('country') as string
     const city = formData.get('city') as string
+    const uploaderId = formData.get('uploaderId') as string
 
     if (!file || !title) {
       return c.json({ error: 'File and title are required' }, 400)
@@ -319,21 +320,23 @@ app.post('/api/upload', async (c) => {
     const videoUrl = `http://localhost:3001/videos/${filename}`
     const thumbnailUrl = `http://localhost:3001/thumbnails/default-360.svg`
     
-    // Use demo user ID for now - in a real app, this would come from authentication
-    const demoUserId = '12345678-1234-1234-1234-123456789012'
+    // Use provided uploader ID or fall back to demo user
+    const finalUploaderId = uploaderId || '12345678-1234-1234-1234-123456789012'
     
-    // First, ensure demo user exists
-    await pool.query(`
-      INSERT INTO users (id, username, email, password_hash, display_name, bio)
-      VALUES ($1, $2, $3, $4, $5, $6)
-      ON CONFLICT (id) DO NOTHING
-    `, [demoUserId, 'demo_user', 'demo@example.com', 'hashed_password', 'Demo User', 'Welcome to my 360° video collection!'])
+    // Ensure user exists (for backward compatibility with demo user)
+    if (!uploaderId) {
+      await pool.query(`
+        INSERT INTO users (id, username, email, password_hash, display_name, bio)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        ON CONFLICT (id) DO NOTHING
+      `, [finalUploaderId, 'demo_user', 'demo@example.com', 'hashed_password', 'Demo User', 'Welcome to my 360° video collection!'])
+    }
 
     const insertResult = await pool.query(`
       INSERT INTO videos (title, description, video_url, thumbnail_url, location_name, country, city, uploader_id, status)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'approved')
       RETURNING id
-    `, [title, description, videoUrl, thumbnailUrl, locationName, country, city, demoUserId])
+    `, [title, description, videoUrl, thumbnailUrl, locationName, country, city, finalUploaderId])
 
     const videoId = insertResult.rows[0].id
 

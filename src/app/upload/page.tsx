@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { uploadVideoLocal } from '@/lib/api'
+import AuthButton from '@/components/AuthButton'
 import Link from 'next/link'
 
 export default function UploadPage() {
@@ -123,17 +124,20 @@ export default function UploadPage() {
               </h1>
             </Link>
 
-            <nav className="hidden md:flex items-center space-x-6">
-              <Link href="/" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                Home
-              </Link>
-              <Link href="/upload" className="text-blue-600 dark:text-blue-400 font-medium">
-                Upload
-              </Link>
-              <Link href="/profile" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                My Profile
-              </Link>
-            </nav>
+            <div className="flex items-center space-x-6">
+              <nav className="hidden md:flex items-center space-x-6">
+                <Link href="/" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                  Home
+                </Link>
+                <Link href="/upload" className="text-blue-600 dark:text-blue-400 font-medium">
+                  Upload
+                </Link>
+                <Link href="/profile" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                  My Profile
+                </Link>
+              </nav>
+              <AuthButton />
+            </div>
           </div>
         </div>
       </header>

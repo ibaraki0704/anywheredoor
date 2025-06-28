@@ -1,0 +1,16 @@
+
+> anywheredoor@0.1.0 dev
+> next dev --turbopack
+
+   ▲ Next.js 15.3.3 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.10.103:3000
+   - Environments: .env
+
+ ✓ Starting...
+ ✓ Ready in 662ms
+ ✓ Compiled /api/auth/[...nextauth] in 475ms
+[33m[auth][warn][debug-enabled][0m Read more: https://warnings.authjs.dev
+ GET /api/auth/csrf 200 in 843ms
+ ✓ Compiled in 3ms
+ ✓ Compiled middleware in 229ms

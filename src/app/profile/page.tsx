@@ -1,14 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 import { getUserProfile, getUserVideos, getWatchHistory, getCategories, updateVideo, deleteVideo, User, Video, WatchHistoryItem, Category } from '@/lib/api'
 import VideoCard from '@/components/VideoCard'
+import AuthButton from '@/components/AuthButton'
 import Link from 'next/link'
 
-// Mock user ID for demonstration - In a real app, this would come from authentication
-const MOCK_USER_ID = '12345678-1234-1234-1234-123456789012'
-
 export default function ProfilePage() {
+  const { data: session, status } = useSession()
   const [user, setUser] = useState<User | null>(null)
   const [userVideos, setUserVideos] = useState<Video[]>([])
   const [watchHistory, setWatchHistory] = useState<WatchHistoryItem[]>([])
@@ -29,16 +29,21 @@ export default function ProfilePage() {
   })
 
   useEffect(() => {
-    loadProfileData()
-  }, [])
+    if (session?.user?.id) {
+      loadProfileData()
+    }
+  }, [session])
 
   const loadProfileData = async () => {
+    if (!session?.user?.id) return
+    
     try {
       setLoading(true)
+      const userId = session.user.id
       const [profileData, videosData, historyData, categoriesData] = await Promise.all([
-        getUserProfile(MOCK_USER_ID).catch(() => ({ user: createMockUser() })),
-        getUserVideos(MOCK_USER_ID).catch(() => ({ videos: [], page: 1, limit: 12, total: 0 })),
-        getWatchHistory(MOCK_USER_ID).catch(() => ({ watchHistory: [], page: 1, limit: 20, total: 0 })),
+        getUserProfile(userId).catch(() => ({ user: createMockUser() })),
+        getUserVideos(userId).catch(() => ({ videos: [], page: 1, limit: 12, total: 0 })),
+        getWatchHistory(userId).catch(() => ({ watchHistory: [], page: 1, limit: 20, total: 0 })),
         getCategories(),
       ])
       
@@ -55,11 +60,11 @@ export default function ProfilePage() {
   }
 
   const createMockUser = (): User => ({
-    id: MOCK_USER_ID,
-    username: 'demo_user',
-    display_name: 'Demo User',
+    id: session?.user?.id || '',
+    username: session?.user?.email?.split('@')[0] || 'user',
+    display_name: session?.user?.name || 'User',
     bio: 'Welcome to my 360° video collection!',
-    created_at: '2024-01-01T00:00:00Z',
+    created_at: new Date().toISOString(),
   })
 
   const handleEditVideo = (video: Video) => {
@@ -97,6 +102,40 @@ export default function ProfilePage() {
       console.error('Error deleting video:', err)
       alert('Failed to delete video')
     }
+  }
+
+  // Show loading while checking authentication
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="animate-pulse text-center">
+          <div className="h-8 bg-gray-300 dark:bg-gray-700 rounded mb-4 w-48 mx-auto"></div>
+          <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-32 mx-auto"></div>
+        </div>
+      </div>
+    )
+  }
+
+  // Redirect to login if not authenticated
+  if (status === 'unauthenticated') {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            Please sign in to view your profile
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            You need to be logged in to access your profile and manage your videos.
+          </p>
+          <Link
+            href="/login"
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Sign In
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   if (loading) {
@@ -157,17 +196,20 @@ export default function ProfilePage() {
               </h1>
             </Link>
 
-            <nav className="hidden md:flex items-center space-x-6">
-              <Link href="/" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                Home
-              </Link>
-              <Link href="/upload" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                Upload
-              </Link>
-              <Link href="/profile" className="text-blue-600 dark:text-blue-400 font-medium">
-                My Profile
-              </Link>
-            </nav>
+            <div className="flex items-center space-x-6">
+              <nav className="hidden md:flex items-center space-x-6">
+                <Link href="/" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                  Home
+                </Link>
+                <Link href="/upload" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                  Upload
+                </Link>
+                <Link href="/profile" className="text-blue-600 dark:text-blue-400 font-medium">
+                  My Profile
+                </Link>
+              </nav>
+              <AuthButton />
+            </div>
           </div>
         </div>
       </header>
