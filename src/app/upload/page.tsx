@@ -66,7 +66,7 @@ export default function UploadPage() {
         })
       }, 500)
 
-      const result = await uploadVideoLocal(file, {
+      await uploadVideoLocal(file, {
         title,
         description,
         locationName,

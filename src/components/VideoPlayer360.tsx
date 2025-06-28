@@ -38,13 +38,16 @@ export default function VideoPlayer360({
   useEffect(() => {
     if (!containerRef.current) return
 
+    // Cache container reference for cleanup
+    const container = containerRef.current
+
     // Initialize Three.js scene
     const scene = new THREE.Scene()
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
     const renderer = new THREE.WebGLRenderer({ antialias: true })
     
-    renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight)
-    containerRef.current.appendChild(renderer.domElement)
+    renderer.setSize(container.clientWidth, container.clientHeight)
+    container.appendChild(renderer.domElement)
 
     // Create video element
     const video = document.createElement('video')
@@ -211,8 +214,9 @@ export default function VideoPlayer360({
       
       window.removeEventListener('resize', handleResize)
       
-      if (containerRef.current && renderer.domElement) {
-        containerRef.current.removeChild(renderer.domElement)
+      // Use cached container reference to avoid stale closure
+      if (container && renderer.domElement) {
+        container.removeChild(renderer.domElement)
       }
       
       renderer.dispose()

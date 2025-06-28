@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { getVideos, getFeaturedVideos, getCategories, Video, Category } from '@/lib/api'
 import VideoCard from '@/components/VideoCard'
 import Link from 'next/link'
@@ -20,7 +20,7 @@ export default function Home() {
 
   useEffect(() => {
     loadVideos()
-  }, [selectedCategory, searchQuery])
+  }, [selectedCategory, searchQuery, loadVideos])
 
   const loadInitialData = async () => {
     try {
@@ -42,7 +42,7 @@ export default function Home() {
     }
   }
 
-  const loadVideos = async () => {
+  const loadVideos = useCallback(async () => {
     try {
       const videosData = await getVideos({
         limit: 12,
@@ -54,7 +54,7 @@ export default function Home() {
       console.error('Error loading videos:', err)
       setError('Failed to load videos')
     }
-  }
+  }, [selectedCategory, searchQuery])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
