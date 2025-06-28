@@ -130,8 +130,8 @@ export default function UploadPage() {
               <Link href="/upload" className="text-blue-600 dark:text-blue-400 font-medium">
                 Upload
               </Link>
-              <Link href="/explore" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                Explore
+              <Link href="/profile" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                My Profile
               </Link>
             </nav>
           </div>

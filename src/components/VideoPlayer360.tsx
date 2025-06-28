@@ -35,6 +35,22 @@ export default function VideoPlayer360({
   const mouseRef = useRef({ x: 0, y: 0, isDown: false })
   const cameraRotationRef = useRef({ x: 0, y: 0 })
 
+  // Initialize fullscreen state
+  useEffect(() => {
+    const doc = document as Document & {
+      webkitFullscreenElement?: Element
+      mozFullScreenElement?: Element
+      msFullscreenElement?: Element
+    }
+    const isCurrentlyFullscreen = !!(
+      document.fullscreenElement ||
+      doc.webkitFullscreenElement ||
+      doc.mozFullScreenElement ||
+      doc.msFullscreenElement
+    )
+    setIsFullscreen(isCurrentlyFullscreen)
+  }, [])
+
   useEffect(() => {
     if (!containerRef.current) return
 
@@ -194,6 +210,27 @@ export default function VideoPlayer360({
 
     window.addEventListener('resize', handleResize)
 
+    // Handle fullscreen change events
+    const handleFullscreenChange = () => {
+      const doc = document as Document & {
+        webkitFullscreenElement?: Element
+        mozFullScreenElement?: Element
+        msFullscreenElement?: Element
+      }
+      const isCurrentlyFullscreen = !!(
+        document.fullscreenElement ||
+        doc.webkitFullscreenElement ||
+        doc.mozFullScreenElement ||
+        doc.msFullscreenElement
+      )
+      setIsFullscreen(isCurrentlyFullscreen)
+    }
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange)
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange)
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange)
+
     // Cleanup
     return () => {
       if (animationIdRef.current) {
@@ -213,6 +250,11 @@ export default function VideoPlayer360({
       canvas.removeEventListener('touchmove', handleTouchMove)
       
       window.removeEventListener('resize', handleResize)
+      
+      document.removeEventListener('fullscreenchange', handleFullscreenChange)
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange)
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange)
+      document.removeEventListener('MSFullscreenChange', handleFullscreenChange)
       
       // Use cached container reference to avoid stale closure
       if (container && renderer.domElement) {
@@ -247,19 +289,62 @@ export default function VideoPlayer360({
     setVolume(newVolume)
   }
 
-  const toggleFullscreen = () => {
+  const toggleFullscreen = async () => {
     if (!containerRef.current) return
 
-    if (!isFullscreen) {
-      if (containerRef.current.requestFullscreen) {
-        containerRef.current.requestFullscreen()
+    try {
+      // Define types for fullscreen API compatibility
+      const doc = document as Document & {
+        webkitFullscreenElement?: Element
+        mozFullScreenElement?: Element
+        msFullscreenElement?: Element
+        webkitExitFullscreen?: () => Promise<void>
+        mozCancelFullScreen?: () => Promise<void>
+        msExitFullscreen?: () => Promise<void>
       }
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen()
+
+      const element = containerRef.current as HTMLElement & {
+        webkitRequestFullscreen?: () => Promise<void>
+        mozRequestFullScreen?: () => Promise<void>
+        msRequestFullscreen?: () => Promise<void>
       }
+
+      // Check if currently in fullscreen
+      const isCurrentlyFullscreen = !!(
+        document.fullscreenElement ||
+        doc.webkitFullscreenElement ||
+        doc.mozFullScreenElement ||
+        doc.msFullscreenElement
+      )
+
+      if (!isCurrentlyFullscreen) {
+        // Enter fullscreen
+        if (element.requestFullscreen) {
+          await element.requestFullscreen()
+        } else if (element.webkitRequestFullscreen) {
+          await element.webkitRequestFullscreen()
+        } else if (element.mozRequestFullScreen) {
+          await element.mozRequestFullScreen()
+        } else if (element.msRequestFullscreen) {
+          await element.msRequestFullscreen()
+        }
+      } else {
+        // Exit fullscreen
+        if (doc.exitFullscreen) {
+          await doc.exitFullscreen()
+        } else if (doc.webkitExitFullscreen) {
+          await doc.webkitExitFullscreen()
+        } else if (doc.mozCancelFullScreen) {
+          await doc.mozCancelFullScreen()
+        } else if (doc.msExitFullscreen) {
+          await doc.msExitFullscreen()
+        }
+      }
+    } catch (err) {
+      console.error('Error toggling fullscreen:', err)
+      // Fallback: update state based on actual fullscreen status
+      setIsFullscreen(!!document.fullscreenElement)
     }
-    setIsFullscreen(!isFullscreen)
   }
 
   const formatTime = (time: number) => {
@@ -338,10 +423,17 @@ export default function VideoPlayer360({
             <button
               onClick={toggleFullscreen}
               className="text-white hover:text-gray-300 transition-colors"
+              title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-              </svg>
+              {isFullscreen ? (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 9V4.5M9 9H4.5M9 9L3.5 3.5M15 9h4.5M15 9V4.5M15 9l5.5-5.5M9 15v4.5M9 15H4.5M9 15l-5.5 5.5M15 15h4.5M15 15v4.5m0-4.5l5.5 5.5" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                </svg>
+              )}
             </button>
           </div>
         </div>

@@ -168,3 +168,89 @@ export const uploadVideoLocal = async (file: File, videoData: {
 }
 
 export const getLocalVideos = () => apiClient.getLocalVideos()
+
+// User types
+export interface User {
+  id: string
+  username: string
+  display_name?: string
+  avatar_url?: string
+  bio?: string
+  created_at: string
+}
+
+export interface WatchHistoryItem {
+  video: Video
+  viewed_at: string
+  duration_watched: number
+}
+
+// User API functions
+export const getUserProfile = async (userId: string): Promise<{ user: User }> => {
+  const response = await fetch(`${API_BASE_URL}/api/users/${userId}`)
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`)
+  }
+  return response.json()
+}
+
+export const getUserVideos = async (userId: string, options: PaginationOptions = {}): Promise<VideosResponse> => {
+  const { page = 1, limit = 12 } = options
+  const response = await fetch(`${API_BASE_URL}/api/users/${userId}/videos?page=${page}&limit=${limit}`)
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`)
+  }
+  return response.json()
+}
+
+export interface PaginationOptions {
+  page?: number
+  limit?: number
+}
+
+export interface VideosResponse {
+  videos: Video[]
+  page: number
+  limit: number
+  total: number
+}
+
+export const getWatchHistory = async (userId: string, options: PaginationOptions = {}): Promise<{ watchHistory: WatchHistoryItem[], page: number, limit: number, total: number }> => {
+  const { page = 1, limit = 20 } = options
+  const response = await fetch(`${API_BASE_URL}/api/users/${userId}/watch-history?page=${page}&limit=${limit}`)
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`)
+  }
+  return response.json()
+}
+
+export const updateVideo = async (videoId: string, videoData: {
+  title: string
+  description?: string
+  location_name?: string
+  country?: string
+  city?: string
+  category_id?: string
+}): Promise<{ video: Video, message: string }> => {
+  const response = await fetch(`${API_BASE_URL}/api/videos/${videoId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(videoData),
+  })
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`)
+  }
+  return response.json()
+}
+
+export const deleteVideo = async (videoId: string): Promise<{ message: string }> => {
+  const response = await fetch(`${API_BASE_URL}/api/videos/${videoId}`, {
+    method: 'DELETE',
+  })
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`)
+  }
+  return response.json()
+}

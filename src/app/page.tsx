@@ -14,13 +14,19 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    loadInitialData()
-  }, [])
-
-  useEffect(() => {
-    loadVideos()
-  }, [selectedCategory, searchQuery, loadVideos])
+  const loadVideos = useCallback(async () => {
+    try {
+      const videosData = await getVideos({
+        limit: 12,
+        category: selectedCategory || undefined,
+        search: searchQuery || undefined,
+      })
+      setVideos(videosData.videos)
+    } catch (err) {
+      console.error('Error loading videos:', err)
+      setError('Failed to load videos')
+    }
+  }, [selectedCategory, searchQuery])
 
   const loadInitialData = async () => {
     try {
@@ -42,19 +48,13 @@ export default function Home() {
     }
   }
 
-  const loadVideos = useCallback(async () => {
-    try {
-      const videosData = await getVideos({
-        limit: 12,
-        category: selectedCategory || undefined,
-        search: searchQuery || undefined,
-      })
-      setVideos(videosData.videos)
-    } catch (err) {
-      console.error('Error loading videos:', err)
-      setError('Failed to load videos')
-    }
-  }, [selectedCategory, searchQuery])
+  useEffect(() => {
+    loadInitialData()
+  }, [])
+
+  useEffect(() => {
+    loadVideos()
+  }, [selectedCategory, searchQuery, loadVideos])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -119,14 +119,14 @@ export default function Home() {
             </Link>
 
             <nav className="hidden md:flex items-center space-x-6">
-              <Link href="/" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+              <Link href="/" className="text-blue-600 dark:text-blue-400 font-medium">
                 Home
               </Link>
               <Link href="/upload" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                 Upload
               </Link>
-              <Link href="/explore" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                Explore
+              <Link href="/profile" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                My Profile
               </Link>
             </nav>
           </div>
